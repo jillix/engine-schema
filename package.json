@@ -1,0 +1,37 @@
+{
+  "name": "engine-schema",
+  "version": "1.0.0",
+  "description": "Schema validation in Engine projects.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "composition": {
+    "flow": [],
+    "client": {
+      "module": [
+        "index.js"
+      ],
+      "flow": []
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jillix/engine-schema.git"
+  },
+  "keywords": [
+    "jxengine",
+    "file",
+    "system"
+  ],
+  "author": "jillix <contact@jillix.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jillix/engine-schema/issues"
+  },
+  "homepage": "https://github.com/jillix/engine-schema",
+  "dependencies": {
+    "engine-tools": "^1.12.0"
+  },
+  "devDependencies": {}
+}
