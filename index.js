@@ -13,47 +13,55 @@ function validate (data, callback) {
         return callback("Schema not configured");
     }
 
-    // validate data
+    // get schema
     var schema = self._config.schema[data.schema];
-    var valid = tv4.validate(data.data, schema);
 
-    if (valid) {
+    // multiple or single error validation
+    var multiple = self._config.multipleErrors || false;
+
+    // validate data
+    var result = multiple ? tv4.validateMultiple(data.data, schema) : tv4.validate(data.data, schema);
+
+    if (result.valid || result === true) {
         self.flow("schema_valid").write(null, {
             data: data.data,
             schema: data.schema
         });
 
         // send response back
-        callback(null, {
-            valid: true
-        });
+        callback(null, result);
     } else {
-        var error = tv4.error;
+
+        // build result based on validation type
+        if (typeof result !== "object") {
+            result = {
+                valid: result,
+                errors: [tv4.error]
+            }
+        }
+
         self.flow("schema_invalid").write(null, {
             schema: data.schema,
-            error: error
+            errors: result.errors
         });
 
         // send response back
-        callback(null, {
-            valid: false,
-            error: error
-        });
+        callback(null, result);
     }
 }
 
 exports.validate = function (data, stream) {
     var self = this;
 
-    validate.call(self, data, function (err, response) {
+    validate.call(self, data, function (err, result) {
 
         // look for a callback if provided
         var callback = data.callback || function () {};
-        callback(err, response);
+        callback(err, result);
 
         // write response to stream
         if (stream) {
-            stream.write(err, response);
+            stream.write(err, result);
         }
     });
 };
