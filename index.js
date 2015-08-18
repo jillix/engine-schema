@@ -1,20 +1,17 @@
 var tv4 = require("./tv4");
 
-exports.validate = function (data) {
+function validate (data, callback) {
     var self = this;
 
     // check data
     if (!data || !data.data || !data.schema) {
-        return console.error("Data provided not valid");
+        return callback("Data provided not valid");
     }
 
     // check if the required schema was configured
     if (!self._config || !self._config.schema || !self._config.schema[data.schema]) {
-        return console.error("Schema not configured");
+        return callback("Schema not configured");
     }
-
-    // look for a callback
-    var callback = data.callback || function () {};
 
     // validate data
     var schema = self._config.schema[data.schema];
@@ -26,8 +23,10 @@ exports.validate = function (data) {
             schema: data.schema
         });
 
-        // send response back via callback
-        callback(true);
+        // send response back
+        callback(null, {
+            valid: true
+        });
     } else {
         var error = tv4.error;
         self.flow("schema_invalid").write(null, {
@@ -35,7 +34,26 @@ exports.validate = function (data) {
             error: error
         });
 
-        // send response back via callback
-        callback(false, error);
+        // send response back
+        callback(null, {
+            valid: false,
+            error: error
+        });
     }
+}
+
+exports.validate = function (data, stream) {
+    var self = this;
+
+    validate.call(self, data, function (err, response) {
+
+        // look for a callback if provided
+        var callback = data.callback || function () {};
+        callback(err, response);
+
+        // write response to stream
+        if (stream) {
+            stream.write(err, response);
+        }
+    });
 };
