@@ -3,14 +3,16 @@ Schema validation for engine
 
 # Events
  - `schema_valid` - Emited if a schema is valid. The `data` object contains:
- ```js
+
+ ```javascript
  {
     data: {...}, // the data object that was validated
     schema: "..." // the name/id of the schema used to validate the data object
  }
  ```
  - `schema_invalid` - Emited if a schema is invalid.
-  ```js
+
+  ```javascript
  {
     errors: [...], // an array of erros resulted from the validation
     schema: "..." // the name/id of the schema used to validate the data object
@@ -27,7 +29,7 @@ Schemas will be configured in the **composition** of the engine-schema instance.
 
 ##### Example
 
-  ```json
+  ``` json
 {
     "client": {
         "config": {
