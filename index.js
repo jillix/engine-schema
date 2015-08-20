@@ -59,9 +59,15 @@ exports.validate = function (data, stream) {
         var callback = data.callback || function () {};
         callback(err, result);
 
-        // write response to stream
-        if (stream) {
-            stream.write(err, result);
+        if (err) {
+            return stream.write(err);
+        }
+
+        // if the result is valid send the data back
+        if (result.valid) {
+            stream.write(null, data);
+        } else {
+            stream.write(result.errors);
         }
     });
 };
