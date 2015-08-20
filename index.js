@@ -1,32 +1,38 @@
 var tv4 = require("./tv4");
 
-function validate (data, callback) {
+function validate (options, callback) {
     var self = this;
 
     // check data
-    if (!data || !data.data || !data.schema) {
+    if (!options || !options.data || !options.schema) {
         return callback("Data provided not valid");
     }
 
     // check if the required schema was configured
-    if (!self._config || !self._config.schema || !self._config.schema[data.schema]) {
+    if (!self._config || !self._config.schema || !self._config.schema[options.schema]) {
         return callback("Schema not configured");
     }
 
     // get schema
-    var schema = self._config.schema[data.schema];
+    var schema = self._config.schema[options.schema];
 
     // multiple or single error validation
-    var multiple = self._config.multipleErrors || false;
+    var multiple = options.multipleErrors || false;
 
     // validate data
-    var result = multiple ? tv4.validateMultiple(data.data, schema) : tv4.validate(data.data, schema);
+    var result = multiple ? tv4.validateMultiple(options.data, schema) : tv4.validate(options.data, schema);
 
     if (result.valid || result === true) {
         self.flow("schema_valid").write(null, {
-            data: data.data,
-            schema: data.schema
+            data: options.data,
+            schema: options.schema
         });
+
+        if (typeof result !== "object") {
+            result = {
+                valid: result
+            }
+        }
 
         // send response back
         callback(null, result);
@@ -41,7 +47,7 @@ function validate (data, callback) {
         }
 
         self.flow("schema_invalid").write(null, {
-            schema: data.schema,
+            schema: options.schema,
             errors: result.errors
         });
 
