@@ -16,7 +16,9 @@
     "client": {
       "module": [
         "index.js",
-        "tv4.js"
+        "libs/tv4.js",
+        "libs/formats.js",
+        "libs/validator.js"
       ]
     }
   },
