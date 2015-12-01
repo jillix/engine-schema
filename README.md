@@ -1,6 +1,8 @@
 # Engine Schema
 Schema validation for engine
 
+# WARNING! The docs below are outdated.
+
 # Events
  - `schema_valid` - Emited if a schema is valid. The `data` object contains:
 
