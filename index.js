@@ -50,20 +50,21 @@ function validate (options, callback) {
     }
 }
 
-exports.validate = function (data, stream) {
+exports.validate = function (_options, data, next) {
     var self = this;
 
     validate.call(self, data, function (err, result) {
-        // look for a callback if provided
-        var callback = data.callback || function () {};
-        callback(err, result);
 
+        if (err) {
+            //TODO better error messages
+            return next(new Error(err));
+        }
 
-        stream.write(err, result);
+        return next(null, result)
     });
 };
 
-exports.init = function () {
+exports.init = function (config, reaady) {
     var self = this;
 
     // add validation formats
