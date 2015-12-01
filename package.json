@@ -1,44 +1,28 @@
 {
-  "name": "engine-schema",
-  "version": "1.0.0",
-  "description": "Schema validation in Engine projects.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "composition": {
-    "flow": [
-      [
-        "validate",
-        ":validate"
-      ]
+    "name": "engine-schema",
+    "version": "0.1.0",
+    "description": "Schema validation in Engine projects.",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:jillix/engine-schema.git"
+    },
+    "keywords": [
+        "jxengine",
+        "file",
+        "system"
     ],
-    "client": {
-      "module": [
-        "index.js",
-        "libs/tv4.js",
-        "libs/formats.js",
-        "libs/validator.js"
-      ]
+    "author": "jillix <contact@jillix.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/jillix/engine-schema/issues"
+    },
+    "homepage": "https://github.com/jillix/engine-schema",
+    "dependencies": {
+        "tv4": "1.2.3",
+        "tv4-formats": "1.0.0"
+    },
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
     }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:jillix/engine-schema.git"
-  },
-  "keywords": [
-    "jxengine",
-    "file",
-    "system"
-  ],
-  "author": "jillix <contact@jillix.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jillix/engine-schema/issues"
-  },
-  "homepage": "https://github.com/jillix/engine-schema",
-  "dependencies": {
-    "tv4": "1.2.3"
-  },
-  "devDependencies": {}
 }
