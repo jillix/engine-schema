@@ -1,74 +1,78 @@
-var tv4 = require("./libs/tv4");
-var formats = require("./libs/formats.js");
-
-function validate (options, callback) {
-    var self = this;
-
-    // check data
-    if (!options || !options.data || !options.schema) {
-        return callback("Data provided not valid");
+var tv4 = require('tv4');
+var formats = require('tv4-formats');
+var validate = require('./lib/validate');
+var defaultOptions = {
+    validate: {
+        schema: null,
+        multipleErrors: false
     }
+};
 
-    if (typeof options.schema === "string") {
-        // check if the required schema was configured
-        if (!self._config || !self._config.schema || !self._config.schema[options.schema]) {
-            return callback("Schema not configured");
-        }
+function validateDefOptions (options, data) {
+    var defOptions = {};
+    options = options || {};
+    data = data || {};
 
-        var schema = self._config.schema[options.schema];  
-    } else {
-        var schema = options.schema;
-    }
+    Object.keys(defaultOptions['validate']).forEach(function (option) {
+        defOptions[option] = (options[option] || data[option]) || defaultOptions['validate'][option];
+    });
 
-    // multiple or single error validation
-    var multiple = options.multipleErrors || false;
+    return defOptions;
+};
 
-    // validate data
-    var result = multiple ? tv4.validateMultiple(options.data, schema) : tv4.validate(options.data, schema);
-
-    if (result.valid || result === true) {
-        if (typeof result !== "object") {
-            result = {
-                valid: result
-            }
-        }
-
-        // send response back
-        callback(null, result);
-    } else {
-
-        // build result based on validation type
-        if (typeof result !== "object") {
-            result = {
-                valid: result,
-                errors: [tv4.error]
-            }
-        }
-
-        // send response back
-        callback(null, result);
-    }
-}
 
 exports.validate = function (_options, data, next) {
     var self = this;
 
-    validate.call(self, data, function (err, result) {
+    // define the validate options
+    var options = validateDefOptions(_options, data);
+    var data = _options.data || data.data;
 
-        if (err) {
-            //TODO better error messages
-            return next(new Error(err));
+    // check if options provided are valid
+    if (!options.schema) {
+        return next(new Error('Engine-Schema.validate: No schema provided.'));
+    }
+
+    // check if data was provided
+    if (!data) {
+        return next(new Error('Engine-Schema.validate: No data provided.'));
+    }
+
+    // fetch schema
+    if (typeof options.schema === 'string') {
+
+        if (!self._schemas[options.schema]) {
+            return next(new Error('Engine-Schema.validate: Schema "' + options.schema + '" not found.'));
         }
 
-        return next(null, result)
+        options.schema = self._schemas[options.schema];
+    }
+
+    // schema must be an object
+    if (typeof options.schema !== 'object' || options.schema instanceof Array) {
+        return next(new Error('Engine-Schema.validate: Schema must be an object'));
+    }
+
+    // validate the data
+    validate(tv4, data, options, function (err, result) {
+
+        if (err) {
+            return next(err, result || null);
+        }
+
+        next(null, result);
     });
 };
 
-exports.init = function (config, reaady) {
+exports.init = function (config, ready) {
     var self = this;
 
+    // init schemas
+    self._config = self._config || {};
+    self._schemas = self._config.schema;
+
     // add validation formats
-    tv4.addFormat({
-        "email": formats.email
-    });
+    tv4.addFormat(formats);
+
+    ready();
 }
