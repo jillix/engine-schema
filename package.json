@@ -1,10 +1,10 @@
 {
-    "name": "engine-schema",
+    "name": "flow-schema",
     "version": "0.1.0",
-    "description": "Schema validation in Engine projects.",
+    "description": "Schema validation for Flow projects",
     "repository": {
         "type": "git",
-        "url": "git@github.com:jillix/engine-schema.git"
+        "url": "git@github.com:jillix/flow-schema.git"
     },
     "keywords": [
         "flow",
@@ -15,9 +15,9 @@
     "author": "jillix <contact@jillix.com>",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/jillix/engine-schema/issues"
+        "url": "https://github.com/jillix/flow-schema/issues"
     },
-    "homepage": "https://github.com/jillix/engine-schema",
+    "homepage": "https://github.com/jillix/flow-schema",
     "dependencies": {
         "tv4": "1.2.3",
         "tv4-formats": "1.0.0",
