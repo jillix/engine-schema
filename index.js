@@ -1,69 +1,81 @@
-var tv4 = require('tv4');
-var formats = require('tv4-formats');
-var validate = require('./lib/validate');
-var defaultOptions = {
-    validate: {
-        schema: null,
-        multipleErrors: false
-    }
-};
+var tv4 = require('tv4')
+  , formats = require('tv4-formats')
+  , libobj = require('libobject')
+  , ValidationError = require('./lib/validationError');
 
-function validateDefOptions (options, data) {
-    var defOptions = {};
-    options = options || {};
-    data = data || {};
-
-    Object.keys(defaultOptions['validate']).forEach(function (option) {
-        defOptions[option] = (options[option] || data[option]) || defaultOptions['validate'][option];
-    });
-
-    return defOptions;
-};
-
-
+/**
+ * Validates data based on a JSON schema v4
+ *
+ * @name validate
+ * @function
+ * @param {Object} options - Data handler options
+ * @param {Object|String} options._.schema - Name of the schema or an object containing the schema (required)
+ * @param {Boolean} options._.detailedError - If true a more detailed error message will be provided (default = false)
+ * @param {String} options._.validate - Validate specific data from the data object
+ * @param {Object} data - Data object to be validated (required)
+ * @param {Function} next - Data handler next function
+ */
 exports.validate = function (_options, data, next) {
     var self = this;
 
-    // define the validate options
-    var options = validateDefOptions(_options, data);
-    var data = _options.data || data.data;
+    // define default options
+    var options = {
+        schema: _options._.schema,
+        detailedError: _options._.detailedError || false,
+        validate: _options._.validate
+    };
 
-    // check if options provided are valid
     if (!options.schema) {
-        return next(new Error('Engine-Schema.validate: No schema provided.'));
+        return next(new ValidationError(500, 'No schema provided.'));
     }
 
-    // check if data was provided
-    if (!data) {
-        return next(new Error('Engine-Schema.validate: No data provided.'));
-    }
-
-    // fetch schema
+    // prepare schema configuration
     if (typeof options.schema === 'string') {
-
         if (!self._schemas[options.schema]) {
-            return next(new Error('Engine-Schema.validate: Schema "' + options.schema + '" not found.'));
+            return next(new ValidationError(500, 'Schema not found in the module config.'));
         }
-
         options.schema = self._schemas[options.schema];
     }
 
-    // schema must be an object
-    if (typeof options.schema !== 'object' || options.schema instanceof Array) {
-        return next(new Error('Engine-Schema.validate: Schema must be an object'));
+    if (!libobj.isObject(options.schema)) {
+        return next(new ValidationError(500, 'Schema is of wrong type.'));
     }
 
-    // validate the data
-    validate(tv4, data, options, function (err, result) {
+    // prepare data
+    var dataToValidate = options.validate ? libobj.path(options.validate, data) : data;
+    if (!dataToValidate) {
+        return next(new ValidationError(500, 'Missing data object'));
+    }
 
-        if (err) {
-            return next(err, result || null);
+    // choose validation method
+    var method = options.detailedError ? "validateMultiple" : "validate";
+
+    // validate data
+    var result = tv4[method](dataToValidate, options.schema);
+
+    if (result.valid || result === true) {
+        return next(null, data);
+    } else {
+        var errors = [];
+        if (typeof result !== 'object') {
+            errors = [tv4.error.message];
+        } else {
+            result.errors.forEach(function (error) {
+                errors.push(error.message);
+            });
         }
 
-        next(null, result);
-    });
+        var error = new ValidationError(400, 'Schema validation failed.', 'validation_error', errors);
+        return next(error);
+    }
 };
 
+/**
+ *  Initilizes module
+ *
+ *  @name init
+ *  @private
+ */
 exports.init = function (config, ready) {
     var self = this;
 

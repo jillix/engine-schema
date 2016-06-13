@@ -7,9 +7,10 @@
         "url": "git@github.com:jillix/engine-schema.git"
     },
     "keywords": [
-        "jxengine",
-        "file",
-        "system"
+        "flow",
+        "service",
+        "schema",
+        "jillix"
     ],
     "author": "jillix <contact@jillix.com>",
     "license": "MIT",
@@ -19,7 +20,8 @@
     "homepage": "https://github.com/jillix/engine-schema",
     "dependencies": {
         "tv4": "1.2.3",
-        "tv4-formats": "1.0.0"
+        "tv4-formats": "1.0.0",
+        "libobject": "github:jillix/libobject"
     },
     "main": "index.js",
     "scripts": {
