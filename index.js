@@ -1,5 +1,4 @@
-var tv4 = require('tv4')
-  , formats = require('tv4-formats')
+var Ajv = require('ajv')
   , libobj = require('libobject')
   , ValidationError = require('./lib/validationError');
 
@@ -10,7 +9,6 @@ var tv4 = require('tv4')
  * @function
  * @param {Object} options - Data handler options
  * @param {Object|String} options._.schema - Name of the schema or an object containing the schema (required)
- * @param {Boolean} options._.detailedError - If true a more detailed error message will be provided (default = false)
  * @param {String} options._.validate - Validate specific data from the data object
  * @param {Object} data - Data object to be validated (required)
  * @param {Function} next - Data handler next function
@@ -47,26 +45,14 @@ exports.validate = function (_options, data, next) {
         return next(new ValidationError(500, 'Missing data object'));
     }
 
-    // choose validation method
-    var method = options.detailedError ? "validateMultiple" : "validate";
+    // validate
+    var valid = self._validator.validate(options.schema, dataToValidate);
 
-    // validate data
-    var result = tv4[method](dataToValidate, options.schema);
-
-    if (result.valid || result === true) {
+    if (valid) {
         return next(null, data);
     } else {
-        var errors = [];
-        if (typeof result !== 'object') {
-            errors = [tv4.error.message];
-        } else {
-            result.errors.forEach(function (error) {
-                errors.push(error.message);
-            });
-        }
-
-        var error = new ValidationError(400, 'Schema validation failed.', 'validation_error', errors);
-        return next(error);
+        var errors = self._validator.errorsText().split(', ');
+        return next(new ValidationError(400, 'Schema validation failed.', 'validation_error', errors));
     }
 };
 
@@ -80,11 +66,12 @@ exports.init = function (config, ready) {
     var self = this;
 
     // init schemas
-    self._config = self._config || {};
     self._schemas = self._config.schema;
 
-    // add validation formats
-    tv4.addFormat(formats);
+    // init validator
+    self._validator = new Ajv({
+        allErrors: config.allErrors || false
+    });
 
     ready();
 }
