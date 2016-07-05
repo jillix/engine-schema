@@ -24,25 +24,33 @@ exports.validate = function (_options, data, next) {
     };
 
     if (!options.schema) {
-        return next(new ValidationError(500, 'No schema provided.'));
+        var error = new ValidationError(500, 'No schema provided.');
+        error._ = data;
+        return next(error);
     }
 
     // prepare schema configuration
     if (typeof options.schema === 'string') {
         if (!self._schemas[options.schema]) {
-            return next(new ValidationError(500, 'Schema not found in the module config.'));
+            var error = new ValidationError(500, 'Schema not found in the module config.');
+            error._ = data;
+            return next(error);
         }
         options.schema = self._schemas[options.schema];
     }
 
     if (!libobj.isObject(options.schema)) {
-        return next(new ValidationError(500, 'Schema is of wrong type.'));
+        var error = new ValidationError(500, 'Schema is of wrong type.');
+        error._ = data;
+        return next(error);
     }
 
     // prepare data
     var dataToValidate = options.validate ? libobj.path(options.validate, data) : data;
     if (!dataToValidate) {
-        return next(new ValidationError(500, 'Missing data object'));
+        var error = new ValidationError(500, 'Missing data object');
+        error._ = data;
+        return next(error);
     }
 
     // validate
@@ -52,7 +60,9 @@ exports.validate = function (_options, data, next) {
         return next(null, data);
     } else {
         var errors = self._validator.errorsText().split(', ');
-        return next(new ValidationError(400, 'Schema validation failed.', 'validation_error', errors));
+        var error = new ValidationError(400, 'Schema validation failed.', 'validation_error', errors);
+        error._ = data;
+        return next(error);
     }
 };
 
