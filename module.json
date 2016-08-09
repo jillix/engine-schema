@@ -2,6 +2,9 @@
     "@context": [
         "http://localhost:8080/context/module.jsonld",
         {
+            "schema": "http://www.ontologydesignpatterns.org/ont/dul/IOLite.owl#hasSchema",
+            "validate": "http://dbpedia.org/property/target",
+            "allErrors": "jillix:allErrors"
         }
     ],
     "@id": "https://github.com/jillix/flow-schema#readme",
@@ -12,7 +15,11 @@
     "author": "jillix",
     "gitRepository": "git+https://github.com/jillix/flow-schema.git",
     "exports": [
+        {
+            "@type": "DataHandler",
+            "name": "validate",
+            "options": []
+        }
     ],
-    "options": [
-    ]
+    "options": []
 }
